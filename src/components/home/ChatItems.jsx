@@ -1,15 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChatLandingPage from "./ChatLandingPage";
-import { initializeWebSocket, sendMessage } from "../../services/websocketService";
 import {useSelector} from 'react-redux'
 import { fetchChatMessages } from "../../services/chatServices";
-const ChatItems = ({ selectedUser }) => {
+import VideoCall from "../videoCall/videoCall";
+
+const ChatItems = ({ selectedUser,onSendMessage }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [socket, setSocket] = useState(null)
   const currentUserId = useSelector(state=>state.auth.userId)
   const messageEndRef = useRef(null)
+  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
+  const [videoRoomId, setVideoRoomId] = useState(null);
 
+  // chat 
   useEffect(()=>{
     if (selectedUser && currentUserId){
       fetchChatList()
@@ -69,6 +73,46 @@ const ChatItems = ({ selectedUser }) => {
     }
   };
 
+  // videocall
+  const initiateVideoCall = () => {
+    const roomId = `${currentUserId}_${selectedUser.id}_${Date.now()}`;
+    setVideoRoomId(roomId);
+    setIsVideoCallActive(true);
+    // Send a message to the other user inviting them to the video call
+    socket.send(JSON.stringify({
+      type: 'video-call-invite',
+      roomId: roomId,
+      sender: currentUserId,
+      receiver: selectedUser.id,
+      message: 'video call invite',
+    }));
+  };
+  const handleVideoCallInvite = (roomId, senderId) => {
+    console.log('Received video call invite:', roomId);
+    // Only show the confirmation if the current user is not the sender
+    if (senderId !== currentUserId) {
+      if (window.confirm('You have a video call invite. Join?')) {
+        setVideoRoomId(roomId);
+        setIsVideoCallActive(true);
+      }
+    }
+  };
+  useEffect(() => {
+    if (socket) {
+      socket.onmessage = (event) => {
+        console.log('Received message:', event.data);
+        const data = JSON.parse(event.data);
+        if (data.type === 'video-call-invite') {
+          console.log('Received video call invite:', data);
+          handleVideoCallInvite(data.roomId, data.sender);
+        } else {
+          setMessages((prevMessages) => [...prevMessages, data]);
+        }
+      };
+    }
+  }, [socket, currentUserId]);
+  
+
   if (!selectedUser) {
     return (
       <div className="flex-1 bg-gray-900 flex items-center justify-center">
@@ -76,11 +120,28 @@ const ChatItems = ({ selectedUser }) => {
       </div>
     );
   }
-
+  if (isVideoCallActive) {
+    return (
+      <div className="w-80">
+        <div></div>
+      <VideoCall
+        roomId={videoRoomId}
+        isInitiator={videoRoomId.startsWith(currentUserId)}
+        onEndCall={() => setIsVideoCallActive(false)}
+        />
+        </div>
+    )
+  }
   return (
     <div className="flex-1 bg-gray-900 text-white flex flex-col">
       <header className="bg-black p-4 border-b border-gray-700">
         <h1 className="text-2xl font-semibold">{selectedUser.username}</h1>
+        <button 
+          onClick={initiateVideoCall}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Start Video Call
+        </button>
       </header>
 
       <div className="flex-1 overflow-y-auto p-4">
