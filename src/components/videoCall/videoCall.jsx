@@ -10,7 +10,15 @@ const VideoCall = ({ roomId, isInitiator, onEndCall }) => {
   useEffect(() => {
     const initCall = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        const constraints = {
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            aspectRatio: 16/9
+          },
+          audio: true
+        };
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {aspectRatio: 4/3}, audio: true });
         localVideoRef.current.srcObject = stream;
 
         const peerConnection = new RTCPeerConnection({
@@ -103,6 +111,8 @@ const VideoCall = ({ roomId, isInitiator, onEndCall }) => {
             createAndSendOffer();
         }
         break;
+      case 'end-call':
+        onEndCall()
     }
   };
 
@@ -136,7 +146,7 @@ const VideoCall = ({ roomId, isInitiator, onEndCall }) => {
 
   const handleIceCandidate = (candidate) => {
     try {
-      if (peerConnectionRef.current.remoteDescription) {
+      if (peerConnectionRef.current.remoteDescription && peerConnectionRef.current?.signalingState !== "closed") {
         peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
       } else {
         setIceCandidates(prev => [...prev, candidate]);
@@ -159,14 +169,24 @@ const VideoCall = ({ roomId, isInitiator, onEndCall }) => {
       websocketRef.current.send(JSON.stringify(signal));
     }
   };
-
+  const handleEndCall = ()=>{
+    sendSignal({type: 'end-call'})
+    onEndCall()
+  }
   return (
-    <div className="video-call-container">
-      <video ref={localVideoRef} autoPlay muted playsInline className="local-video" />
-      <video ref={remoteVideoRef} autoPlay playsInline className="remote-video" />
-      <button onClick={onEndCall}>End Call</button>
+    <div className="video-call-container h-full bg-gray-900 flex flex-col items-center justify-center object-contain">
+      <div className="video-grid grid grid-cols-2 gap-4 mb-4 ">
+        <video ref={localVideoRef} autoPlay playsInline className="w-full h-auto rounded-lg" />
+        <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-auto rounded-lg" />
+      </div>
+      <button
+        onClick={handleEndCall} 
+        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+      >
+        End Call
+      </button>
     </div>
   );
-};
+}; 
 
 export default VideoCall;

@@ -4,7 +4,7 @@ import {useSelector} from 'react-redux'
 import { fetchChatMessages } from "../../services/chatServices";
 import VideoCall from "../videoCall/videoCall";
 
-const ChatItems = ({ selectedUser,onSendMessage }) => {
+const ChatItems = ({ selectedUser,onStartVideoCall }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [socket, setSocket] = useState(null)
@@ -76,8 +76,7 @@ const ChatItems = ({ selectedUser,onSendMessage }) => {
   // videocall
   const initiateVideoCall = () => {
     const roomId = `${currentUserId}_${selectedUser.id}_${Date.now()}`;
-    setVideoRoomId(roomId);
-    setIsVideoCallActive(true);
+    onStartVideoCall(roomId)
     // Send a message to the other user inviting them to the video call
     socket.send(JSON.stringify({
       type: 'video-call-invite',
@@ -87,30 +86,20 @@ const ChatItems = ({ selectedUser,onSendMessage }) => {
       message: 'video call invite',
     }));
   };
-  const handleVideoCallInvite = (roomId, senderId) => {
-    console.log('Received video call invite:', roomId);
-    // Only show the confirmation if the current user is not the sender
-    if (senderId !== currentUserId) {
-      if (window.confirm('You have a video call invite. Join?')) {
-        setVideoRoomId(roomId);
-        setIsVideoCallActive(true);
-      }
-    }
-  };
   useEffect(() => {
     if (socket) {
       socket.onmessage = (event) => {
-        console.log('Received message:', event.data);
         const data = JSON.parse(event.data);
         if (data.type === 'video-call-invite') {
-          console.log('Received video call invite:', data);
-          handleVideoCallInvite(data.roomId, data.sender);
+          if (data.sender !== currentUserId && window.confirm('You have a video call invite. Join?')) {
+            onStartVideoCall(data.roomId);
+          }
         } else {
           setMessages((prevMessages) => [...prevMessages, data]);
         }
       };
     }
-  }, [socket, currentUserId]);
+  }, [socket, currentUserId, onStartVideoCall]);
   
 
   if (!selectedUser) {
@@ -133,13 +122,16 @@ const ChatItems = ({ selectedUser,onSendMessage }) => {
   }
   return (
     <div className="flex-1 bg-gray-900 text-white flex flex-col">
-      <header className="bg-black p-4 border-b border-gray-700">
+      <header className="bg-black p-4 border-b border-gray-700 flex justify-between">
         <h1 className="text-2xl font-semibold">{selectedUser.username}</h1>
         <button 
           onClick={initiateVideoCall}
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
-          Start Video Call
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+          </svg>
+
         </button>
       </header>
 
