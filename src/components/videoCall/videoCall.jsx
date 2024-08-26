@@ -35,11 +35,13 @@ const VideoCall = ({ roomId, isInitiator, onEndCall }) => {
 
         ws.onopen = () => {
             console.log("WebSocket connected for video call");
+            
             if (isInitiator) {
               console.log("Initiating call as initiator");
               createAndSendOffer();
-            } else {
+            } else { 
               console.log("Joining call as receiver");
+              sendSignal({type:'ready'}) 
             }
           };
 
@@ -77,12 +79,15 @@ const VideoCall = ({ roomId, isInitiator, onEndCall }) => {
   }, [roomId, isInitiator]);
 
   const createAndSendOffer = async () => {
+    console.log(('snding pffer'));
+    
     const offer = await peerConnectionRef.current.createOffer();
     await peerConnectionRef.current.setLocalDescription(offer);
     sendSignal({ type: 'offer', offer: offer });
   };
 
   const handleSignalingMessage = async (message) => {
+    console.log(peerConnectionRef.current.signalingState, 'current state',message.type);
     switch (message.type) {
       case 'offer':
         await handleOffer(message.offer);
@@ -93,36 +98,54 @@ const VideoCall = ({ roomId, isInitiator, onEndCall }) => {
       case 'ice-candidate':
         handleIceCandidate(message.candidate);
         break;
+      case 'ready':
+        if (isInitiator) {
+            createAndSendOffer();
+        }
+        break;
     }
   };
 
   const handleOffer = async (offer) => {
-    if (peerConnectionRef.current.signalingState !== "stable") {
-      console.warn("Ignoring offer in non-stable state");
-      return;
+    try {
+      if (peerConnectionRef.current.signalingState !== "stable") {
+        console.warn("Ignoring offer in non-stable state");
+        return;
+      }
+      await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await peerConnectionRef.current.createAnswer();
+      await peerConnectionRef.current.setLocalDescription(answer);
+      sendSignal({ type: 'answer', answer });
+    } catch (error) {
+      console.error("Error handling offer:", error);
     }
-    await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(offer));
-    const answer = await peerConnectionRef.current.createAnswer();
-    await peerConnectionRef.current.setLocalDescription(answer);
-    sendSignal({ type: 'answer', answer: answer });
+  }
+  const handleAnswer = async (answer) => {
+    try {
+      if (peerConnectionRef.current.signalingState !== "have-local-offer") {
+        console.warn("Received answer in unexpected state, ignoring");
+        return;
+      }
+      await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer));
+      processPendingIceCandidates();
+    } catch (error) {
+      console.error("Error handling answer:", error);
+    }
   };
 
-  const handleAnswer = async (answer) => {
-    if (peerConnectionRef.current.signalingState === "stable") {
-      console.warn("Received answer in stable state, ignoring");
-      return;
-    }
-    await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer));
-    processPendingIceCandidates();
-  };
 
   const handleIceCandidate = (candidate) => {
-    if (peerConnectionRef.current.remoteDescription) {
-      peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-    } else {
-      setIceCandidates(prev => [...prev, candidate]);
+    try {
+      if (peerConnectionRef.current.remoteDescription) {
+        peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+      } else {
+        setIceCandidates(prev => [...prev, candidate]);
+      }
+    } catch (error) {
+      console.error("Error handling ICE candidate:", error);
     }
   };
+
 
   const processPendingIceCandidates = () => {
     iceCandidates.forEach(candidate => {

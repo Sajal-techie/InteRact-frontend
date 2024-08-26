@@ -123,7 +123,6 @@ const ChatItems = ({ selectedUser,onSendMessage }) => {
   if (isVideoCallActive) {
     return (
       <div className="w-80">
-        <div></div>
       <VideoCall
         roomId={videoRoomId}
         isInitiator={videoRoomId.startsWith(currentUserId)}
