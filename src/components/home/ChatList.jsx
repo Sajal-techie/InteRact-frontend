@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import useFetchUsers from "../../hooks/useFetchUsers";
 import { useSelector } from "react-redux";
 import userApi from "../../services/axios";
 import { endpoints } from "../../services/endpoints";
@@ -63,7 +62,7 @@ const ChatList = ({ userList, onSelectUser }) => {
     console.log('Online users updated:', onlineUsers);
   }, [onlineUsers]);
   return (
-    <div className="w-1/4 bg-black text-white border-r border-gray-700 ">
+    <div className="w-1/4 sm:w-64 bg-black text-white border-r border-gray-700 ">
       <header className="p-4 border-b border-gray-700 flex justify-between items-center bg-black">
         <h1 className="text-2xl font-semibold text-white">InteRact</h1>
       </header>

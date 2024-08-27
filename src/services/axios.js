@@ -51,7 +51,7 @@ userApi.interceptors.response.use(
         try{
             console.log(error.response,'inside reposcne error',error.config);
             const previosRequest = error.config
-        if (error.response && error.response.status === 401 && error.response.data != "No active account found with the given credentials"){
+        if (error.response && error.response.status === 401 && error.response.data != "No active account found with the given credentials" &&   (error.response?.data?.messages &&  error.response?.data?.messages[0]?.token_type === "access")){
             previosRequest._retry = true
                 try {
                     console.log(' in try');
@@ -65,7 +65,7 @@ userApi.interceptors.response.use(
                     let data = await err?.data?.code === 'user_inactive' ? "You account is blocked" : "session expired try login again"
                     // showToastMessage(400,data)
                     setTimeout(()=>{
-                        // window.location.href = '/'
+                        window.location.href = '/'
                     },1500)
                     return Promise.reject(err)
                 }

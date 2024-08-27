@@ -1,5 +1,5 @@
 
----
+
 
 ### **Frontend README**
 
@@ -13,10 +13,7 @@ Welcome to the **InteRact Frontend** repository! This is the frontend part of th
 - [Features](#features)
 - [Project Structure](#project-structure)
 - [Installation](#installation)
-- [Usage](#usage)
-- [Environment Variables](#environment-variables)
-- [Contributing](#contributing)
-- [License](#license)
+
 
 ## **Introduction**
 InteRact is designed to provide a seamless and interactive user experience for real-time communication. This frontend application interacts with the backend via REST APIs and WebSockets to deliver real-time messaging and video calling features.
@@ -59,3 +56,4 @@ InteRact is designed to provide a seamless and interactive user experience for r
     ```bash
     npm run dev
     ```
+
