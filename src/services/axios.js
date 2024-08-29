@@ -1,7 +1,7 @@
 import axios  from "axios";
 // import { showToastMessage } from "../Components/common/functions/showToastMessage";
 
-export const baseUrl = 'http://16.171.226.212'
+export const baseUrl = 'https://interact.muhammeddanish.site'
 
 // to create an instance of axios with baseurl
 const userApi = axios.create({
