@@ -12,7 +12,7 @@ const ChatList = ({ userList, onSelectUser }) => {
   
     if (userID) {
       const ws = new WebSocket(
-        `ws://${import.meta.env.VITE_BACKEND_URL}/ws/presence/${userID}/`
+        `wss://${import.meta.env.VITE_BACKEND_URL}/ws/presence/${userID}/`
       );
 
       ws.onopen = () => {

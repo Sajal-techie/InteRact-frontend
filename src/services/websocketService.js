@@ -2,7 +2,7 @@
 let ws = null
 
 export const initializeWebSocket = (token, onMessageReceived) => {
-    ws = new WebSocket(`ws://${import.meta.env.VITE_BACKEND_URL}/ws/chat/?token=${token}`)
+    ws = new WebSocket(`wss://${import.meta.env.VITE_BACKEND_URL}/ws/chat/?token=${token}`)
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data)
         onMessageReceived(data)

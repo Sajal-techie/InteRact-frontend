@@ -38,7 +38,7 @@ const VideoCall = ({ roomId, isInitiator, onEndCall }) => {
           }
         };
 
-        const ws = new WebSocket(`ws://${import.meta.env.VITE_BACKEND_URL}/ws/video/${roomId}/`);
+        const ws = new WebSocket(`wss://${import.meta.env.VITE_BACKEND_URL}/ws/video/${roomId}/`);
         websocketRef.current = ws;
 
         ws.onopen = () => {

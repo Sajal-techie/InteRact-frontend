@@ -36,7 +36,7 @@ const ChatItems = ({ selectedUser,onStartVideoCall }) => {
   useEffect(()=>{
     if (selectedUser && currentUserId){
       const threadName = [currentUserId, selectedUser.id].sort().join('_')
-      let websocket = new WebSocket(`ws://${import.meta.env.VITE_BACKEND_URL}/ws/chat/${threadName}/`)
+      let websocket = new WebSocket(`wss://${import.meta.env.VITE_BACKEND_URL}/ws/chat/${threadName}/`)
       
       websocket.onopen = ()=>{
         console.log("web socket connectd");
