@@ -1,9 +1,3 @@
-
-
-
-### **Frontend README**
-
-```markdown
 # InteRact Frontend
 
 Welcome to the **InteRact Frontend** repository! This is the frontend part of the InteRact application, a real-time communication platform that includes chat and video calling. The frontend is built with React, utilizing Redux for state management, and styled with Tailwind CSS.
