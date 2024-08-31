@@ -1,7 +1,6 @@
 import axios  from "axios";
-// import { showToastMessage } from "../Components/common/functions/showToastMessage";
 
-export const baseUrl = 'https://interact.muhammeddanish.site'
+export const baseUrl = import.meta.env.VITE_BASE_URL
 
 // to create an instance of axios with baseurl
 const userApi = axios.create({

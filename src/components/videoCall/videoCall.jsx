@@ -10,14 +10,6 @@ const VideoCall = ({ roomId, isInitiator, onEndCall }) => {
   useEffect(() => {
     const initCall = async () => {
       try {
-        const constraints = {
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            aspectRatio: 16/9
-          },
-          audio: true
-        };
         const stream = await navigator.mediaDevices.getUserMedia({ video: {aspectRatio: 4/3}, audio: true });
         localVideoRef.current.srcObject = stream;
 
@@ -74,15 +66,7 @@ const VideoCall = ({ roomId, isInitiator, onEndCall }) => {
     initCall();
 
     return () => {
-      if (localVideoRef.current?.srcObject) {
-        localVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
-      }
-      if (peerConnectionRef.current) {
-        peerConnectionRef.current.close();
-      }
-      if (websocketRef.current) {
-        websocketRef.current.close();
-      }
+      cleanupCall()
     };
   }, [roomId, isInitiator]);
 
@@ -112,7 +96,7 @@ const VideoCall = ({ roomId, isInitiator, onEndCall }) => {
         }
         break;
       case 'end-call':
-        onEndCall()
+        handleEndCall()
     }
   };
 
@@ -169,13 +153,29 @@ const VideoCall = ({ roomId, isInitiator, onEndCall }) => {
       websocketRef.current.send(JSON.stringify(signal));
     }
   };
-  const handleEndCall = ()=>{
-    sendSignal({type: 'end-call'})
-    onEndCall()
-  }
+  const cleanupCall = () => {
+    if (localVideoRef.current?.srcObject) {
+      localVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
+    }
+    if (remoteVideoRef.current?.srcObject) {
+      remoteVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
+    }
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+    }
+    if (websocketRef.current) {
+      websocketRef.current.close();
+    }
+  };
+
+  const handleEndCall = () => {
+    sendSignal({ type: 'end-call' });
+    cleanupCall();
+    onEndCall();
+  }; 
   return (
-    <div className="video-call-container h-full bg-gray-900 flex flex-col items-center justify-center object-contain">
-      <div className="video-grid grid grid-cols-2 gap-4 mb-4 ">
+    <div className="video-call-container h-full bg-gray-900 flex flex-col items-center justify-center">
+      <div className="video-grid grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <video ref={localVideoRef} autoPlay playsInline className="w-full h-auto rounded-lg" />
         <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-auto rounded-lg" />
       </div>

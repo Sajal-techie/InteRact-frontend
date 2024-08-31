@@ -24,7 +24,7 @@ const authSlice = createSlice({
             state.loading = false
             state.user = action.payload.user
             state.error = null
-            state.user_id = action.payload.user_id
+            state.userId = action.payload.user_id
         })
         .addCase(SignupThunk.rejected, (state, action) => {
             console.log("signoup rejected", action);
@@ -45,6 +45,13 @@ const authSlice = createSlice({
             console.log('in login rejected');
             state.loading = false
             state.error = action.payload
+        })
+        .addCase(LogoutThunk.fulfilled, (state,action)=>{
+            console.log("logout succesful in slice");
+            state.user = null
+            state.userId = null
+            state.error = null
+            state.loading = null
         })
         
     }

@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import userApi from "../../services/axios";
 import { endpoints } from "../../services/endpoints";
 
-const ChatList = ({ userList, onSelectUser }) => {
+const ChatList = ({ userList, onSelectUser,handleLogout }) => {
   const [onlineUsers, setOnlineUsers] = useState({});
   const userID = useSelector((state) => state.auth.userId);
 
@@ -65,6 +65,15 @@ const ChatList = ({ userList, onSelectUser }) => {
     <div className="w-1/4 sm:w-64 bg-black text-white border-r border-gray-700 ">
       <header className="p-4 border-b border-gray-700 flex justify-between items-center bg-black">
         <h1 className="text-2xl font-semibold text-white">InteRact</h1>
+        <button
+            onClick={handleLogout}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-4 rounded"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+            </svg>
+
+        </button>
       </header>
 
       <div className=" overflow-y-auto p-3 mb-9 pb-20 bg-gray-900">

@@ -31,10 +31,10 @@ export const loginService = async (userData) => {
 
 export const logoutService = async() => {
     try{
-        const response = await userApi.post(endpoints.logout)
-        console.log(response, 'response in logout service');
+        // const response = await userApi.post(endpoints.logout)
+        // console.log(response, 'response in logout service');
         localStorage.clear()
-        return response.data
+        return 
     }catch(error){
         console.log(error, "error in logout");
         

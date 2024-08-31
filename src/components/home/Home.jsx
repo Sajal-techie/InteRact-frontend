@@ -3,7 +3,9 @@ import useFetchUsers from '../../hooks/useFetchUsers';
 import ChatList from './ChatList';
 import ChatItems from './ChatItems';
 import VideoCall from '../videoCall/videoCall';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { LogoutThunk } from '../../redux/thunks/authThunk';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const { userList, error, loading } = useFetchUsers();
@@ -11,7 +13,18 @@ const Home = () => {
   const [isVideoCallActive, setIsVideoCallActive] = useState(false);
   const [videoRoomId, setVideoRoomId] = useState(null);
   const currentUserId = useSelector(state=>state.auth.userId)
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
+  const handleLogout = async () => {
+    try{
+
+      await dispatch(LogoutThunk()).unwrap()
+      navigate('/')
+    }catch(error){
+      console.log("error logging out");
+    }
+  };
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-900">
@@ -41,22 +54,18 @@ const Home = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-900">
-        <ChatList userList={userList} onSelectUser={setSelectedUser} />
-      <div className="flex-1 flex">
+    <div className="flex h-screen">
+      {/* Sidebar */}
+    <ChatList userList={userList} onSelectUser={setSelectedUser} handleLogout={handleLogout}/>
+
+      {/* Main Chat Area */}
+      <div className="flex-1 relative flex flex-col">
+
+        {/* Chat Area */}
         {isVideoCallActive ? (
-          <div className="h-full">
-            <VideoCall
-              roomId={videoRoomId}
-              isInitiator={videoRoomId.startsWith(currentUserId)}
-              onEndCall={handleEndVideoCall}
-            />
-          </div>
+          <VideoCall roomId={videoRoomId} onEndCall={handleEndVideoCall} />
         ) : (
-          <ChatItems
-            selectedUser={selectedUser}
-            onStartVideoCall={handleStartVideoCall}
-          />
+          <ChatItems selectedUser={selectedUser} onStartVideoCall={handleStartVideoCall} />
         )}
       </div>
     </div>
