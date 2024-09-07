@@ -63,7 +63,7 @@ const Home = () => {
 
         {/* Chat Area */}
         {isVideoCallActive ? (
-          <VideoCall roomId={videoRoomId} onEndCall={handleEndVideoCall} />
+          <VideoCall roomId={videoRoomId} isInitiator={videoRoomId.startsWith(currentUserId)} onEndCall={handleEndVideoCall} />
         ) : (
           <ChatItems selectedUser={selectedUser} onStartVideoCall={handleStartVideoCall} />
         )}
